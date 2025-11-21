@@ -68,7 +68,7 @@ export default function Home() {
           }
           alt={heroMovie?.title || "Hero Background"}
           fill
-          className="object-cover object-top"
+          className="object-cover object-top object-center"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/70"></div>

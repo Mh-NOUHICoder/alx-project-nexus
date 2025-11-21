@@ -96,13 +96,13 @@ export default function MovieDetails() {
           src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
           alt={movie.title}
           fill
-          className="object-cover object-top opacity-70"
+          className="object-cover object-top  object-center  opacity-90"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black"></div>
 
         <div className="absolute bottom-10 left-10 z-10">
-          <h1 className="text-4xl md:text-6xl font-bold text-filmsouk-gold">
+          <h1 className="text-2xl md:text-6xl font-bold text-filmsouk-gold">
             {movie.title}
           </h1>
           {movie.original_title !== movie.title && (

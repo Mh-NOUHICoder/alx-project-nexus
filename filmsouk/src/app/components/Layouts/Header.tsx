@@ -14,7 +14,7 @@ export default function Header() {
   const [results, setResults] = useState<any[]>([]);
   const pathname = usePathname();
 
-  // 🔍 Live search
+  // 🔍 Live search with debounce
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
       if (query.trim().length > 2) {
@@ -35,10 +35,17 @@ export default function Header() {
       } else {
         setResults([]);
       }
-    }, 400); // debounce for smoother typing
+    }, 400);
 
     return () => clearTimeout(delayDebounce);
   }, [query]);
+
+  // ✅ Reset search after click
+  const handleResultClick = () => {
+    setQuery("");
+    setResults([]);
+    setOpen(false);
+  };
 
   return (
     <header className="flex items-center h-16 justify-between px-6 py-4 bg-black/50 shadow-md relative">
@@ -80,13 +87,14 @@ export default function Header() {
             className="px-3 py-2 bg-white/10 backdrop-blur-md text-white placeholder-gray-400 rounded-full focus:outline-none w-40"
           />
 
-          {/* Modern dropdown results */}
+          {/* Dropdown results */}
           {results.length > 0 && (
             <div className="absolute top-full right-0 mt-2 w-72 bg-black/90 backdrop-blur-md rounded-lg shadow-lg p-3 z-50 animate-fadeIn">
               {results.map((movie) => (
                 <Link
                   key={movie.id}
                   href={`/movies/${movie.id}`}
+                  onClick={handleResultClick}
                   className="flex items-center gap-3 p-2 hover:bg-white/10 rounded-md transition"
                 >
                   {movie.posterPath && (
@@ -146,7 +154,7 @@ export default function Header() {
                       <Link
                         key={movie.id}
                         href={`/movies/${movie.id}`}
-                        onClick={() => setOpen(false)}
+                        onClick={handleResultClick}
                         className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-md transition"
                       >
                         {movie.posterPath && (
