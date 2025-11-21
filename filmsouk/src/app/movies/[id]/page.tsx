@@ -3,20 +3,25 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { fetchFromTMDB } from "../../lib/tmdb";
 import { genreMap } from "../../utils/genreMap";
-import { X } from "lucide-react"; // ✅ Lucide close icon
+import { X } from "lucide-react";
+import MovieCard from "@/app/components/MovieCard";
 
 export default function MovieDetails() {
-  const { id } = useParams(); // movie ID from URL
+  const { id } = useParams();
   const [movie, setMovie] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadMovie() {
-      const data = await fetchFromTMDB(`/movie/${id}?append_to_response=credits,videos`);
+      const data = await fetchFromTMDB(
+        `/movie/${id}?append_to_response=credits,videos`
+      );
       if (data) {
         setMovie(data);
 
@@ -27,6 +32,16 @@ export default function MovieDetails() {
           setIsFavorite(favorites.some((f: any) => f.id === data.id));
         }
       }
+
+      // ✅ Fetch recommendations
+      let recData = await fetchFromTMDB(`/movie/${id}/recommendations`);
+
+      if (!recData?.results?.length) {
+        // If no recommendations, try similar movies
+        recData = await fetchFromTMDB(`/movie/${id}/similar`);
+      }
+
+      setRecommendations(recData.results || []);
     }
     loadMovie();
   }, [id]);
@@ -54,7 +69,6 @@ export default function MovieDetails() {
 
   if (!movie) return <p className="text-center text-gray-400">Loading...</p>;
 
-  // Find YouTube trailer
   const trailer = movie.videos?.results?.find(
     (v: any) => v.type === "Trailer" && v.site === "YouTube"
   );
@@ -73,14 +87,16 @@ export default function MovieDetails() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black"></div>
 
         <div className="absolute bottom-10 left-10 z-10">
-          <h1 className="text-4xl md:text-6xl font-bold text-filmsouk-gold">{movie.title}</h1>
+          <h1 className="text-4xl md:text-6xl font-bold text-filmsouk-gold">
+            {movie.title}
+          </h1>
           {movie.original_title !== movie.title && (
             <p className="text-lg text-gray-300">{movie.original_title}</p>
           )}
           <div className="mt-4 flex items-center gap-4">
             <button
               onClick={handleFavoriteClick}
-              className="bg-black/60 p-3 rounded-full hover:bg-filmsouk-gold transition"
+              className="bg-white/20 backdrop-blur-md p-3 rounded-full hover:bg-filmsouk-gold transition flex items-center justify-center"
             >
               {isFavorite ? (
                 <FaHeart size={24} className="text-filmsouk-gold" />
@@ -88,16 +104,19 @@ export default function MovieDetails() {
                 <FaRegHeart size={24} className="text-white" />
               )}
             </button>
-            <span className="text-gray-200">{movie.release_date?.slice(0, 4)}</span>
-            <span className="text-filmsouk-gold font-bold">{movie.vote_average.toFixed(1)} ⭐</span>
+            <span className="text-gray-200">
+              {movie.release_date?.slice(0, 4)}
+            </span>
+            <span className="text-filmsouk-gold font-bold">
+              {movie.vote_average.toFixed(1)} ⭐
+            </span>
             <span>{movie.runtime} min</span>
           </div>
 
-          {/* Watch Trailer Button */}
           {trailer && (
             <button
               onClick={() => setShowTrailer(true)}
-              className="mt-4 px-6 py-3 bg-filmsouk-gold text-black font-semibold rounded-lg shadow-md hover:scale-105 hover:cursor-pointer transition"
+              className="mt-4 px-6 py-3 bg-filmsouk-gold text-black font-semibold rounded-lg shadow-md hover:scale-105 transition"
             >
               🎬 Watch Trailer
             </button>
@@ -140,15 +159,44 @@ export default function MovieDetails() {
         </div>
       </section>
 
+      {/* Recommendations Section */}
+      <section className="p-6 max-w-6xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-4">
+          Because you watched {movie.title}
+        </h2>
+        {recommendations.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {recommendations.slice(0, 10).map((rec) => (
+              <MovieCard
+                key={rec.id}
+                id={rec.id}
+                title={rec.title}
+                arabicTitle={
+                  rec.original_title !== rec.title
+                    ? rec.original_title
+                    : undefined
+                }
+                posterPath={rec.poster_path}
+                rating={rec.vote_average}
+                releaseDate={rec.release_date}
+                genres={rec.genre_ids?.map((id: number) => genreMap[id])}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400">No recommendations available.</p>
+        )}
+      </section>
+
       {/* Trailer Modal */}
       {showTrailer && trailer && (
         <div
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-          onClick={() => setShowTrailer(false)} // close when clicking outside
+          onClick={() => setShowTrailer(false)}
         >
           <div
             className="relative w-full max-w-3xl aspect-video bg-black rounded-lg shadow-lg"
-            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+            onClick={(e) => e.stopPropagation()}
           >
             <iframe
               src={`https://www.youtube.com/embed/${trailer.key}`}
@@ -158,12 +206,11 @@ export default function MovieDetails() {
               className="w-full h-full rounded-lg"
             ></iframe>
 
-            {/* Close button */}
             <button
               onClick={() => setShowTrailer(false)}
-              className="absolute top-2 right-2 bg-black/70 text-white p-2 rounded-full  hover:text-filmsouk-gold cursor-pointer transition"
+              className="absolute top-2 right-2 bg-black/70 text-white p-2 rounded-full hover:text-filmsouk-gold transition"
             >
-              <X size={24} /> {/* ✅ Lucide close icon */}
+              <X size={24} />
             </button>
           </div>
         </div>

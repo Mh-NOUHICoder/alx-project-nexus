@@ -64,7 +64,7 @@ export default function Home() {
 
         <div className="relative z-10 text-center px-6 max-w-2xl">
           <h1 className="text-5xl md:text-6xl font-bold text-filmsouk-gold drop-shadow-lg">
-            Welcome to FilmSouk
+            Welcome to Golden Screen
           </h1>
           <p className="mt-4 text-lg md:text-xl text-gray-200">
             Discover trending films, timeless classics, and hidden gems.

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaHeart, FaRegHeart } from "react-icons/fa"; // ✅ use react-icons
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 interface MovieCardProps {
   id: number;
@@ -25,24 +25,33 @@ export default function MovieCard({
   genres = [],
 }: MovieCardProps) {
   const IMG_BASE_URL = "https://image.tmdb.org/t/p/w500";
-
   const primaryGenres = genres.slice(0, 2);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const handleFavoriteClick = () => {
-    setIsFavorite(!isFavorite);
+  // ✅ Check localStorage when component mounts
+  useEffect(() => {
+    const stored = localStorage.getItem("favorites");
+    if (stored) {
+      const favorites = JSON.parse(stored);
+      setIsFavorite(favorites.some((f: any) => f.id === id));
+    }
+  }, [id]);
 
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // ✅ prevents Link navigation when clicking the heart
     const stored = localStorage.getItem("favorites");
     const favorites = stored ? JSON.parse(stored) : [];
 
-    if (!isFavorite) {
-      // Add movie
+    const alreadyExists = favorites.some((f: any) => f.id === id);
+
+    if (!alreadyExists) {
       favorites.push({ id, title, posterPath, rating, releaseDate, genres });
       localStorage.setItem("favorites", JSON.stringify(favorites));
+      setIsFavorite(true);
     } else {
-      // Remove movie
       const updated = favorites.filter((f: any) => f.id !== id);
       localStorage.setItem("favorites", JSON.stringify(updated));
+      setIsFavorite(false);
     }
   };
 
@@ -64,13 +73,15 @@ export default function MovieCard({
         {/* Favorite icon (top-left) */}
         <button
           onClick={handleFavoriteClick}
-          className="absolute top-2 left-2 z-30 bg-black/60 backdrop-blur-sm p-2 rounded-full hover:bg-filmsouk-gold transition"
-        >
-          {isFavorite ? (
-            <FaHeart size={20} className="text-filmsouk-gold" />
-          ) : (
-            <FaRegHeart size={20} className="text-white" />
-          )}
+          className={`absolute top-2 left-2 z-30 p-2 rounded-full transition
+          ${
+            isFavorite
+              ? "bg-white/30 backdrop-blur-md text-filmsouk-gold" // filled gold when active
+              : "bg-white/30 backdrop-blur-md text-white hover:bg-filmsouk-gold hover:text-black"
+          }
+          flex items-center justify-center hover:scale-110 hover:cursor-pointer shadow-md`}
+              >
+          {isFavorite ? <FaHeart size={20} /> : <FaRegHeart size={20} />}
         </button>
 
         {/* Grouped infos (top-right, hidden until hover) */}

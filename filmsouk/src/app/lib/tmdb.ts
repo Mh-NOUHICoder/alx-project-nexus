@@ -3,11 +3,17 @@ import { genreMap } from "@/app/utils/genreMap";
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_KEY;
 
+/**
+ * Generic fetch wrapper for TMDb
+ */
 export async function fetchFromTMDB(endpoint: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}${endpoint}&api_key=${API_KEY}`);
+    // Decide whether to use ? or & depending on endpoint
+    const separator = endpoint.includes("?") ? "&" : "?";
+
+    const res = await fetch(`${API_BASE_URL}${endpoint}${separator}api_key=${API_KEY}`);
     if (!res.ok) throw new Error(`TMDb error: ${res.status}`);
-    return res.json();
+    return await res.json();
   } catch (error) {
     console.error("TMDb fetch failed:", error);
     return null;
