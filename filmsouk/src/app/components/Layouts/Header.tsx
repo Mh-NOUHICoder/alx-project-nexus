@@ -48,7 +48,9 @@ export default function Header() {
   };
 
   return (
-    <header className="flex items-center h-16 justify-between px-6 py-4 bg-black/50 shadow-md relative">
+    <header className="fixed top-0 left-0 w-full h-16 z-50 flex items-center justify-between px-6 py-4
+  bg-black/10 backdrop-blur-md border-b border-white/10 transition-all duration-300">
+
       {/* Logo */}
       <Link href="/" className="flex items-center space-x-3 z-20">
         <Image
@@ -64,13 +66,22 @@ export default function Header() {
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex flex-1 justify-center space-x-8 text-lg text-gray-300">
-        <Link href="/" className="flex items-center gap-2 hover:text-filmsouk-gold transition">
+        <Link
+          href="/"
+          className="flex items-center gap-2 hover:text-[#D4AF37] hover:scale-105 duration-300 transition-colors"
+        >
           <Home size={20} /> Home
         </Link>
-        <Link href="/favorites" className="flex items-center gap-2 hover:text-filmsouk-gold transition">
+        <Link
+          href="/favorites"
+          className="flex items-center gap-2 hover:text-[#D4AF37] hover:scale-105 duration-300 transition-colors"
+        >
           <Heart size={20} /> Favorites
         </Link>
-        <Link href="/new-movies" className="flex items-center gap-2 hover:text-filmsouk-gold transition">
+        <Link
+          href="/new-movies"
+          className="flex items-center gap-2 hover:text-[#D4AF37] hover:scale-105 duration-300 transition-colors"
+        >
           <Sparkles size={20} /> New Movies
         </Link>
       </nav>
@@ -111,7 +122,8 @@ export default function Header() {
                       {movie.title}
                     </span>
                     <span className="text-xs text-gray-400">
-                      {movie.releaseDate?.slice(0, 4)} • {movie.genres.join(", ")}
+                      {movie.releaseDate?.slice(0, 4)} •{" "}
+                      {movie.genres.join(", ")}
                     </span>
                   </div>
                 </Link>
@@ -166,7 +178,9 @@ export default function Header() {
                             className="rounded"
                           />
                         )}
-                        <span className="text-white text-sm">{movie.title}</span>
+                        <span className="text-white text-sm">
+                          {movie.title}
+                        </span>
                       </Link>
                     ))}
                   </div>
@@ -174,13 +188,25 @@ export default function Header() {
               </div>
             )}
 
-            <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-3 text-gray-300 hover:text-filmsouk-gold transition">
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 text-gray-300 hover:text-filmsouk-gold transition"
+            >
               <Home size={22} /> Home
             </Link>
-            <Link href="/favorites" onClick={() => setOpen(false)} className="flex items-center gap-3 text-gray-300 hover:text-filmsouk-gold transition">
+            <Link
+              href="/favorites"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 text-gray-300 hover:text-filmsouk-gold transition"
+            >
               <Heart size={22} /> Favorites
             </Link>
-            <Link href="/new-movies" onClick={() => setOpen(false)} className="flex items-center gap-3 text-gray-300 hover:text-filmsouk-gold transition">
+            <Link
+              href="/new-movies"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 text-gray-300 hover:text-filmsouk-gold transition"
+            >
               <Sparkles size={22} /> New Movies
             </Link>
           </div>
