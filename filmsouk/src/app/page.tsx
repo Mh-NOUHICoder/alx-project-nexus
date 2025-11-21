@@ -74,7 +74,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/70"></div>
 
         <div className="relative z-10 text-center px-6 max-w-2xl animate-fadeIn">
-          <h1 className="text-5xl md:text-6xl font-bold text-filmsouk-gold drop-shadow-lg">
+          <h1 className="text-4xl md:text-6xl font-bold text-filmsouk-gold drop-shadow-lg">
             {heroMovie?.title || "Welcome to Golden Screen"}
           </h1>
           <p className="mt-4 text-lg md:text-xl text-gray-200">

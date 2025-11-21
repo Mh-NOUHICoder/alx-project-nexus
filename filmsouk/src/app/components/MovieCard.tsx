@@ -130,12 +130,12 @@ export default function MovieCard({
             <hr className="border-t border-gray-600 mb-2" />
           </div>
           <div className="px-4 pb-3 text-center">
-            <h3 className="text-lg font-medium text-white leading-tight">
+            <h5 className="text-xsm font-normal text-white leading-normal">
               {title}
-            </h3>
-            {arabicTitle && (
+            </h5>
+            {/* {arabicTitle && (
               <p className="text-sm text-gray-300 font-medium">{arabicTitle}</p>
-            )}
+            )} */}
           </div>
         </div>
       </div>

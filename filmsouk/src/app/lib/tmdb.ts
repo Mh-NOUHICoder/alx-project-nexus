@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_TMDB_KEY;
  */
 export async function fetchFromTMDB(endpoint: string) {
   try {
-    // Decide whether to use ? or & depending on endpoint
+    // Append API key
     const separator = endpoint.includes("?") ? "&" : "?";
 
     const res = await fetch(`${API_BASE_URL}${endpoint}${separator}api_key=${API_KEY}`);

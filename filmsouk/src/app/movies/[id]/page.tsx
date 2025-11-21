@@ -102,12 +102,12 @@ export default function MovieDetails() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black"></div>
 
         <div className="absolute bottom-10 left-10 z-10">
-          <h1 className="text-2xl md:text-6xl font-bold text-filmsouk-gold">
+          <h1 className="text-xl md:text-3xl font-bold text-filmsouk-gold">
             {movie.title}
           </h1>
-          {movie.original_title !== movie.title && (
+          {/* {movie.original_title !== movie.title && (
             <p className="text-lg text-gray-300">{movie.original_title}</p>
-          )}
+          )} */}
           <div className="mt-4 flex items-center gap-4">
             <button
               onClick={handleFavoriteClick}
@@ -180,7 +180,7 @@ export default function MovieDetails() {
       {/* Recommendations Section */}
       <section className="p-6 max-w-6xl mx-auto">
         <h2 className="text-2xl font-semibold mb-4">
-          Because you watched {movie.title}
+          Recommendations :
         </h2>
         {recommendations.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
