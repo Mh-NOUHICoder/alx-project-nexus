@@ -9,8 +9,8 @@ const openSans = Open_Sans({ subsets: ["latin"], weight: ["400", "600", "700"] }
 
 
 export const metadata: Metadata = {
-  title: "filmsouk",
-  description: "filmsouk description",
+  title: "golden screen",
+  description: "Golden Screen it's a movie web application for you to discover the latest movies and tv shows.",
 };
 
 export default function RootLayout({
