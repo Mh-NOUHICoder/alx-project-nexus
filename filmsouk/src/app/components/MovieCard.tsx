@@ -80,19 +80,19 @@ export default function MovieCard({
               : "bg-white/30 backdrop-blur-md text-white hover:bg-filmsouk-gold hover:text-black"
           }
           flex items-center justify-center hover:scale-110 hover:cursor-pointer shadow-md`}
-              >
+        >
           {isFavorite ? <FaHeart size={20} /> : <FaRegHeart size={20} />}
         </button>
 
         {/* Grouped infos (top-right, hidden until hover) */}
-        <div className="absolute top-2 right-2 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="px-3 py-3 flex flex-col items-end gap-2 text-xs text-white">
+        <div className=" z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute top-2 right-2 px-3 py-2 flex flex-col items-end gap-2 text-xs text-white max-w-[70%]">
             {primaryGenres.length > 0 && (
               <div className="flex flex-wrap gap-1 justify-end">
                 {primaryGenres.map((g, i) => (
                   <span
                     key={i}
-                    className="px-2 py-1 text-xs bg-white/50 text-black rounded-md font-semibold"
+                    className="px-2 py-1 text-xs bg-white/50 text-black rounded-md font-semibold truncate max-w-[100px]"
                   >
                     {g}
                   </span>

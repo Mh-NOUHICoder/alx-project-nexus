@@ -36,3 +36,8 @@ export async function getMovies(endpoint: string) {
     genres: movie.genre_ids.map((id: number) => genreMap[id]), // ✅ mapped names
   }));
 }
+
+export async function getWatchProviders(movieId: string) {
+  return fetchFromTMDB(`/movie/${movieId}/watch/providers`);
+}
+

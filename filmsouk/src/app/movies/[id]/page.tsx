@@ -3,29 +3,42 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-import { fetchFromTMDB } from "../../lib/tmdb";
+import { fetchFromTMDB, getWatchProviders } from "../../lib/tmdb";
 import { genreMap } from "../../utils/genreMap";
 import { X } from "lucide-react";
 import MovieCard from "@/app/components/MovieCard";
+import WatchProviders from "@/app/components/sections/WatchProviders";
 
 export default function MovieDetails() {
-  const { id } = useParams();
+  const { id } = useParams(); // ✅ works in client component
   const [movie, setMovie] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [providers, setProviders] = useState<any[]>([]);
+  const [providerLink, setProviderLink] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    async function loadProviders() {
+      const providersData = await getWatchProviders(id as string);
+      setProviders(providersData.results?.US?.flatrate || []);
+      setProviderLink(providersData.results?.US?.link || undefined);
+
+    }
+    if (id) loadProviders();
+  }, [id]);
 
   useEffect(() => {
     async function loadMovie() {
+      // ✅ Fetch movie details
       const data = await fetchFromTMDB(
         `/movie/${id}?append_to_response=credits,videos`
       );
       if (data) {
         setMovie(data);
 
-        // Check if already in favorites
+        // Check favorites
         const stored = localStorage.getItem("favorites");
         if (stored) {
           const favorites = JSON.parse(stored);
@@ -35,15 +48,17 @@ export default function MovieDetails() {
 
       // ✅ Fetch recommendations
       let recData = await fetchFromTMDB(`/movie/${id}/recommendations`);
-
       if (!recData?.results?.length) {
-        // If no recommendations, try similar movies
         recData = await fetchFromTMDB(`/movie/${id}/similar`);
       }
-
       setRecommendations(recData.results || []);
+
+      // ✅ Fetch watch providers
+      const providersData = await getWatchProviders(id as string);
+      setProviders(providersData.results?.US?.flatrate || []);
     }
-    loadMovie();
+
+    if (id) loadMovie();
   }, [id]);
 
   const handleFavoriteClick = () => {
@@ -158,6 +173,9 @@ export default function MovieDetails() {
           ))}
         </div>
       </section>
+
+      <WatchProviders providers={providers} link={providerLink} />
+
 
       {/* Recommendations Section */}
       <section className="p-6 max-w-6xl mx-auto">
