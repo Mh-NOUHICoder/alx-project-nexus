@@ -33,11 +33,12 @@ export default function MovieFilterBar({
   const triggerClasses =
     "flex items-center justify-between px-4 py-2 w-full rounded-lg border border-gray-700 bg-[#141416] text-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-filmsouk-gold focus:border-filmsouk-gold";
   const contentClasses =
-    "bg-[#141416] text-gray-200 border border-gray-700 rounded-lg shadow-lg p-2";
+  "bg-[#141416] text-gray-200 border border-gray-700 rounded-lg shadow-lg p-2 " +
+  "max-h-[60vh] overflow-y-auto"; 
 
   return (
-    <div className="w-full  mx-8 flex flex-wrap px-6">
-      <div className="flex flex-wrap  items-center gap-x-3 gap-y-4 mt-8 mb-6">
+    <div className="w-1/2  mx-8 flex flex-row justify-center mx-auto align-center px-6 mt-2 mb-8">
+      <div className="flex flex-row  items-center gap-x-3 gap-y-4 mt-8 mb-6">
         {/* Genre dropdown */}
         <Select value={genre} onValueChange={(val) => update({ genre: val })}>
           <SelectTrigger className={`w-10 min-w-0 truncate ${triggerClasses}`}>

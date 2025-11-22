@@ -38,7 +38,7 @@ const GENRE_ID: Record<string, number> = {
   history: 36,
   war: 10752,
   western: 37,
-  documentary: 99
+  documentary: 99,
 };
 
 export default function Home() {
@@ -56,15 +56,24 @@ export default function Home() {
       backdropPath: m.backdrop_path ?? null,
       rating: typeof m.vote_average === "number" ? m.vote_average : undefined,
       releaseDate: m.release_date ?? m.first_air_date,
-      genres: (m.genre_ids || []).map((id: number) => genreMap[id]).filter(Boolean),
+      genres: (m.genre_ids || [])
+        .map((id: number) => genreMap[id])
+        .filter(Boolean),
       original_language: m.original_language,
-      overview: m.overview
+      overview: m.overview,
     }));
   }
 
   // Build safe discover URL for a page
-  function buildDiscoverUrl(page: number, opts?: { genre?: string; lang?: string }) {
-    const parts: string[] = [`page=${page}`, "include_adult=false", "sort_by=popularity.desc"];
+  function buildDiscoverUrl(
+    page: number,
+    opts?: { genre?: string; lang?: string }
+  ) {
+    const parts: string[] = [
+      `page=${page}`,
+      "include_adult=false",
+      "sort_by=popularity.desc",
+    ];
     if (opts?.lang) parts.push(`with_original_language=${opts.lang}`);
     if (opts?.genre) parts.push(`with_genres=${opts.genre}`);
     return `/discover/movie?${parts.join("&")}`;
@@ -82,7 +91,12 @@ export default function Home() {
   }
 
   // Core loader: fetches multiple pages from discover (or trending fallback)
-  async function loadPool(opts?: { useDiscover?: boolean; genreId?: number | null; lang?: string; pages?: number }) {
+  async function loadPool(opts?: {
+    useDiscover?: boolean;
+    genreId?: number | null;
+    lang?: string;
+    pages?: number;
+  }) {
     setLoading(true);
     try {
       const pages = opts?.pages ?? 3;
@@ -91,7 +105,12 @@ export default function Home() {
 
       if (opts?.useDiscover) {
         // Build urls for multiple pages
-        const urls = Array.from({ length: pages }, (_, i) => buildDiscoverUrl(i + 1, { genre: genreId ? String(genreId) : undefined, lang: lang || undefined }));
+        const urls = Array.from({ length: pages }, (_, i) =>
+          buildDiscoverUrl(i + 1, {
+            genre: genreId ? String(genreId) : undefined,
+            lang: lang || undefined,
+          })
+        );
         console.log("Discover URLs:", urls);
 
         // Fetch in parallel
@@ -102,14 +121,20 @@ export default function Home() {
         // If discover returns nothing, try relaxed queries (genre-only or lang-only)
         if (combined.length === 0) {
           if (genreId) {
-            const genreUrls = Array.from({ length: pages }, (_, i) => buildDiscoverUrl(i + 1, { genre: String(genreId) }));
-            const r2 = await Promise.all(genreUrls.map((u) => fetchFromTMDB(u)));
+            const genreUrls = Array.from({ length: pages }, (_, i) =>
+              buildDiscoverUrl(i + 1, { genre: String(genreId) })
+            );
+            const r2 = await Promise.all(
+              genreUrls.map((u) => fetchFromTMDB(u))
+            );
             combined = dedupeById(r2.map((r) => r?.results ?? []));
           }
         }
         if (combined.length === 0) {
           if (lang) {
-            const langUrls = Array.from({ length: pages }, (_, i) => buildDiscoverUrl(i + 1, { lang }));
+            const langUrls = Array.from({ length: pages }, (_, i) =>
+              buildDiscoverUrl(i + 1, { lang })
+            );
             const r3 = await Promise.all(langUrls.map((u) => fetchFromTMDB(u)));
             combined = dedupeById(r3.map((r) => r?.results ?? []));
           }
@@ -129,8 +154,13 @@ export default function Home() {
       }
 
       // If not using discover, default to trending multi-page
-      const trendingUrls = Array.from({ length: pages }, (_, i) => `/trending/movie/week?page=${i + 1}`);
-      const trendingResponses = await Promise.all(trendingUrls.map((u) => fetchFromTMDB(u)));
+      const trendingUrls = Array.from(
+        { length: pages },
+        (_, i) => `/trending/movie/week?page=${i + 1}`
+      );
+      const trendingResponses = await Promise.all(
+        trendingUrls.map((u) => fetchFromTMDB(u))
+      );
       const trendingResults = trendingResponses.map((r) => r?.results ?? []);
       const combinedTrending = dedupeById(trendingResults);
       const mappedTrending = mapResults(combinedTrending);
@@ -164,7 +194,12 @@ export default function Home() {
     }
 
     // Use discover to fetch 3 pages by default
-    loadPool({ useDiscover: true, genreId: genreId ?? null, lang: lang || undefined, pages: 3 });
+    loadPool({
+      useDiscover: true,
+      genreId: genreId ?? null,
+      lang: lang || undefined,
+      pages: 3,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
@@ -175,7 +210,11 @@ export default function Home() {
     setLoading(true);
     try {
       // fetch first 3 pages of search
-      const urls = Array.from({ length: 3 }, (_, i) => `/search/movie?query=${encodeURIComponent(query)}&page=${i + 1}`);
+      const urls = Array.from(
+        { length: 3 },
+        (_, i) =>
+          `/search/movie?query=${encodeURIComponent(query)}&page=${i + 1}`
+      );
       const responses = await Promise.all(urls.map((u) => fetchFromTMDB(u)));
       const combined = dedupeById(responses.map((r) => r?.results ?? []));
       const mapped = mapResults(combined);
@@ -239,34 +278,41 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Filters */}
-      <MovieFilterBar onFilterChange={(f) => setFilters(f)} />
-
       {/* Movie Grid */}
-      <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-6">
-        <div className="col-span-full">
-          <h1 className="text-3xl font-bold text-white mb-6">
+      <section className="p-6">
+        {/* Heading + Filters row */}
+        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <h1 className="text-3xl font-bold text-white mb-4 md:mb-0">
             {query ? "Search Results" : "Movies"}
           </h1>
+          <div className="absolute top-2 right-2 my-auto">
+            <MovieFilterBar  onFilterChange={(f) => setFilters(f)} />
+          </div>
+          
         </div>
 
-        {loading ? (
-          <p className="text-gray-400 italic col-span-full">Loading…</p>
-        ) : movies.length === 0 ? (
-          <p className="text-gray-400 italic col-span-full">No movies to show.</p>
-        ) : (
-          movies.map((m) => (
-            <MovieCard
-              key={m.id}
-              id={m.id}
-              title={m.title}
-              posterPath={m.posterPath ?? ""} // coerce null to "" to satisfy MovieCard prop type
-              rating={m.rating}
-              releaseDate={m.releaseDate}
-              genres={m.genres}
-            />
-          ))
-        )}
+        {/* Movies grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-18">
+          {loading ? (
+            <p className="text-gray-400 italic col-span-full">Loading…</p>
+          ) : movies.length === 0 ? (
+            <p className="text-gray-400 italic col-span-full">
+              No movies to show.
+            </p>
+          ) : (
+            movies.map((m) => (
+              <MovieCard
+                key={m.id}
+                id={m.id}
+                title={m.title}
+                posterPath={m.posterPath ?? ""}
+                rating={m.rating}
+                releaseDate={m.releaseDate}
+                genres={m.genres}
+              />
+            ))
+          )}
+        </div>
       </section>
     </main>
   );
