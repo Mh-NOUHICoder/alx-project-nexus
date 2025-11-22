@@ -9,7 +9,7 @@ interface MovieCardProps {
   id: number;
   title: string;
   arabicTitle?: string;
-  posterPath: string;
+  posterPath: string | null;
   rating?: number;
   releaseDate?: string;
   genres?: string[];

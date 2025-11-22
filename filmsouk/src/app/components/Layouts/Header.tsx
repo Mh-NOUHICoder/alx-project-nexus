@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Image from "next/image";
 import Link from "next/link";
@@ -80,6 +80,7 @@ export default function Header() {
           <Sparkles size={20} /> New Movies
         </Link>
       </nav>
+      
 
       {/* Small Search Input (only on non-home pages) */}
       {pathname !== "/" && (

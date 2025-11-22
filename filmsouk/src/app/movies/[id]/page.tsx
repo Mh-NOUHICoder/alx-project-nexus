@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import { FaHeart, FaRegHeart , FaPlay } from "react-icons/fa";
-import { fetchFromTMDB, getWatchProviders } from "../../lib/tmdb";
-import { genreMap } from "../../utils/genreMap";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { fetchFromTMDB, getWatchProviders } from "@/app/lib/tmdb";
+import { genreMap } from "@/app/utils/genreMap";
 import { Clapperboard, X } from "lucide-react";
 import MovieCard from "@/app/components/MovieCard";
 import WatchProviders from "@/app/components/sections/WatchProviders";
 
 export default function MovieDetails() {
-  const { id } = useParams(); // ✅ works in client component
+  const { id } = useParams();
   const [movie, setMovie] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
@@ -20,20 +20,16 @@ export default function MovieDetails() {
   const [providerLink, setProviderLink] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-
-
     async function loadProviders() {
       const providersData = await getWatchProviders(id as string);
       setProviders(providersData.results?.US?.flatrate || []);
       setProviderLink(providersData.results?.US?.link || undefined);
-
     }
     if (id) loadProviders();
   }, [id]);
 
   useEffect(() => {
     async function loadMovie() {
-      // ✅ Fetch movie details
       const data = await fetchFromTMDB(
         `/movie/${id}?append_to_response=credits,videos`
       );
@@ -48,14 +44,14 @@ export default function MovieDetails() {
         }
       }
 
-      // ✅ Fetch recommendations
+      // Fetch recommendations
       let recData = await fetchFromTMDB(`/movie/${id}/recommendations`);
       if (!recData?.results?.length) {
         recData = await fetchFromTMDB(`/movie/${id}/similar`);
       }
       setRecommendations(recData.results || []);
 
-      // ✅ Fetch watch providers
+      // Fetch watch providers
       const providersData = await getWatchProviders(id as string);
       setProviders(providersData.results?.US?.flatrate || []);
     }
@@ -84,7 +80,13 @@ export default function MovieDetails() {
     }
   };
 
-  if (!movie) return <p className="text-center text-gray-400">Loading...</p>;
+  if (!movie) return (
+          <div className="flex flex-row items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-yellow-500 animate-bounce"></div>
+            <div className="w-4 h-4 rounded-full bg-yellow-500 animate-bounce [animation-delay:-.3s]"></div>
+            <div className="w-4 h-4 rounded-full bg-yellow-500 animate-bounce [animation-delay:-.5s]"></div>
+          </div>
+          );
 
   const trailer = movie.videos?.results?.find(
     (v: any) => v.type === "Trailer" && v.site === "YouTube"
@@ -98,7 +100,7 @@ export default function MovieDetails() {
           src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
           alt={movie.title}
           fill
-          className="object-cover object-top  object-center  opacity-90"
+          className="object-cover object-top object-center opacity-90"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/80"></div>
@@ -107,13 +109,11 @@ export default function MovieDetails() {
           <h1 className="text-xl md:text-3xl font-bold text-filmsouk-gold">
             {movie.title}
           </h1>
-          {/* {movie.original_title !== movie.title && (
-            <p className="text-lg text-gray-300">{movie.original_title}</p>
-          )} */}
           <div className="mt-4 flex items-center gap-4">
             <button
               onClick={handleFavoriteClick}
               className="bg-white/20 backdrop-blur-md p-3 rounded-full hover:bg-filmsouk-gold transition flex items-center justify-center"
+              aria-label={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             >
               {isFavorite ? (
                 <FaHeart size={24} className="text-filmsouk-gold" />
@@ -178,11 +178,10 @@ export default function MovieDetails() {
 
       <WatchProviders providers={providers} link={providerLink} />
 
-
       {/* Recommendations Section */}
       <section className="p-6 max-w-6xl mx-auto">
         <h2 className="text-2xl font-semibold mb-4">
-          Recommendations :
+          Recommendations
         </h2>
         {recommendations.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -229,6 +228,7 @@ export default function MovieDetails() {
             <button
               onClick={() => setShowTrailer(false)}
               className="absolute top-[-50px] right-2 bg-black/30 text-white p-2 rounded-full hover:text-filmsouk-gold hover:scale-105 cursor-pointer transition"
+              aria-label="Close"
             >
               <X size={24} />
             </button>

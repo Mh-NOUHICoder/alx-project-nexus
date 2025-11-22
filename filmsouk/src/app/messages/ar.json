@@ -1,0 +1,50 @@
+{
+  "Navigation": {
+    "home": "الرئيسية",
+    "newMovies": "أفلام جديدة",
+    "favorites": "المفضلة",
+    "search": "بحث",
+    "language": "اللغة"
+  },
+  "Home": {
+    "welcome": "مرحباً بكم في جولدن سكرين",
+    "discover": "اكتشف الأفلام الرائجة والكلاسيكيات الخالدة والكنوز المخفية.",
+    "trending": "الأفلام الرائجة",
+    "popular": "الأشهر",
+    "searchPlaceholder": "ابحث عن الأفلام...",
+    "searchButton": "بحث",
+    "searchResults": "نتائج البحث"
+  },
+  "Movies": {
+    "releaseDate": "تاريخ الإصدار",
+    "rating": "التقييم",
+    "overview": "النظرة العامة",
+    "genres": "التصنيفات",
+    "watchNow": "شاهد الآن",
+    "addToFavorites": "أضف إلى المفضلة",
+    "removeFromFavorites": "إزالة من المفضلة",
+    "watchTrailer": "شاهد الإعلان",
+    "minutes": "دقيقة",
+    "cast": "طاقم التمثيل",
+    "as": "بدور",
+    "recommendations": "التوصيات",
+    "noRecommendations": "لا توجد توصيات متاحة.",
+    "trailer": "إعلان الفيلم",
+    "close": "إغلاق"
+  },
+  "Favorites": {
+    "title": "قائمتي المفضلة",
+    "empty": "لم تقم بإضافة أي مفضلات بعد.",
+    "emptyDescription": "أضف أفلاماً إلى مفضلتك لتجدها بسهولة"
+  },
+  "NewMovies": {
+    "title": "الأفلام الجديدة",
+    "latestReleases": "أحدث الإصدارات",
+    "noMovies": "لا توجد أفلام جديدة متاحة حالياً."
+  },
+  "Common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "tryAgain": "حاول مرة أخرى"
+  }
+}

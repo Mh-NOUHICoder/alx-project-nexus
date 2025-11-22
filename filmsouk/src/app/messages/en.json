@@ -1,0 +1,50 @@
+{
+  "Navigation": {
+    "home": "Home",
+    "newMovies": "New Movies",
+    "favorites": "Favorites",
+    "search": "Search",
+    "language": "Language"
+  },
+  "Home": {
+    "welcome": "Welcome to Golden Screen",
+    "discover": "Discover trending films, timeless classics, and hidden gems.",
+    "trending": "Trending Movies",
+    "popular": "Popular",
+    "searchPlaceholder": "Search movies...",
+    "searchButton": "Search",
+    "searchResults": "Search Results"
+  },
+  "Movies": {
+    "releaseDate": "Release Date",
+    "rating": "Rating",
+    "overview": "Overview",
+    "genres": "Genres",
+    "watchNow": "Watch Now",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "watchTrailer": "Watch Trailer",
+    "minutes": "min",
+    "cast": "Cast",
+    "as": "as",
+    "recommendations": "Recommendations",
+    "noRecommendations": "No recommendations available.",
+    "trailer": "Movie Trailer",
+    "close": "Close"
+  },
+  "Favorites": {
+    "title": "My Favorites",
+    "empty": "You haven't added any favorites yet.",
+    "emptyDescription": "Add movies to your favorites to find them easily"
+  },
+  "NewMovies": {
+    "title": "New Movies",
+    "latestReleases": "Latest Releases",
+    "noMovies": "No new movies available right now."
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "tryAgain": "Try Again"
+  }
+}
