@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart , FaPlay } from "react-icons/fa";
 import { fetchFromTMDB, getWatchProviders } from "../../lib/tmdb";
 import { genreMap } from "../../utils/genreMap";
-import { X } from "lucide-react";
+import { Clapperboard, X } from "lucide-react";
 import MovieCard from "@/app/components/MovieCard";
 import WatchProviders from "@/app/components/sections/WatchProviders";
 
@@ -20,6 +20,8 @@ export default function MovieDetails() {
   const [providerLink, setProviderLink] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+
+
     async function loadProviders() {
       const providersData = await getWatchProviders(id as string);
       setProviders(providersData.results?.US?.flatrate || []);
@@ -99,7 +101,7 @@ export default function MovieDetails() {
           className="object-cover object-top  object-center  opacity-90"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/80"></div>
 
         <div className="absolute bottom-10 left-10 z-10">
           <h1 className="text-xl md:text-3xl font-bold text-filmsouk-gold">
@@ -131,9 +133,9 @@ export default function MovieDetails() {
           {trailer && (
             <button
               onClick={() => setShowTrailer(true)}
-              className="mt-4 px-6 py-3 bg-filmsouk-gold text-black font-semibold rounded-lg shadow-md hover:scale-105 transition"
+              className="flex items-center gap-2 mt-4 px-6 py-3 bg-filmsouk-gold text-black font-semibold rounded-lg shadow-md hover:scale-105 cursor-pointer transition"
             >
-              🎬 Watch Trailer
+              <Clapperboard size={24} className="" /> Watch Trailer
             </button>
           )}
         </div>
@@ -226,7 +228,7 @@ export default function MovieDetails() {
 
             <button
               onClick={() => setShowTrailer(false)}
-              className="absolute top-2 right-2 bg-black/70 text-white p-2 rounded-full hover:text-filmsouk-gold transition"
+              className="absolute top-[-50px] right-2 bg-black/30 text-white p-2 rounded-full hover:text-filmsouk-gold hover:scale-105 cursor-pointer transition"
             >
               <X size={24} />
             </button>

@@ -71,7 +71,7 @@ export default function Home() {
           className="object-cover object-top object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/70"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/25 to-black/90"></div>
 
         <div className="relative z-10 text-center px-6 max-w-2xl animate-fadeIn">
           <h1 className="text-4xl md:text-6xl font-bold text-filmsouk-gold drop-shadow-lg">

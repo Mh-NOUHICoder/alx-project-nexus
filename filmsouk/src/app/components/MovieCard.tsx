@@ -125,12 +125,12 @@ export default function MovieCard({
         </div>
 
         {/* Bottom glass title */}
-        <div className="absolute bottom-0 w-full z-30 bg-black/10 backdrop-blur-sm">
+        <div className="absolute bottom-0 w-full  bg-black/30 backdrop-blur-sm ">
           <div className="px-4 pt-2">
             <hr className="border-t border-gray-600 mb-2" />
           </div>
           <div className="px-4 pb-3 text-center">
-            <h5 className="text-xsm font-normal text-white leading-normal">
+            <h5 className="text-[11px] md:text-sm md:font-semibold  text-white ">
               {title}
             </h5>
             {/* {arabicTitle && (
