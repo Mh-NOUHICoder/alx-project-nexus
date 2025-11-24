@@ -62,10 +62,7 @@ export default function NewMoviesPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6 mt-12 flex flex-col items-center">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 shadow-md">
-          <Film className="text-gray-400 w-6 h-6" />
-        </div>
+      <div className="flex items-center gap-3 mb-2">
         <h1 className="text-3xl font-bold text-gray-400 tracking-wider">New Movies</h1>
       </div>
 

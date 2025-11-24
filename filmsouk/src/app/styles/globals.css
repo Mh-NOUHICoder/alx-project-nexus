@@ -10,6 +10,17 @@ body {
   font-familly: 'Open-sans';
 }
 
+/* In your global CSS (e.g. styles/globals.css or tailwind base layer) */
+body {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE 10+ */
+}
+
+body::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari */
+}
+
+
 /* Navigation links */
 .link-gold {
   @apply text-gray-300 hover:text-yellow-500 transition-colors;

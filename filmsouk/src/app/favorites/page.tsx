@@ -15,7 +15,7 @@ export default function FavoritesPage() {
 
   return (
     <main className="p-6">
-      <h1 className="text-3xl font-bold text-filmsouk-gold mb-6">My Favorites</h1>
+      <h1 className="text-3xl text-center font-bold text-gray-400/50 dark:text-gray-400/80 mt-8 mb-6">My Favorites</h1>
 
       {favorites.length === 0 ? (
         <p className="text-gray-400">You haven’t added any favorites yet.</p>

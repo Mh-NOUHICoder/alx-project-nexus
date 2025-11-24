@@ -7,6 +7,7 @@ module.exports = {
   ],
   theme: {
     extend: {
+      scrollbar: ['hidden'],
         colors: {
          "filmsouk-gold": "#D4AF37", // your logo’s gold
         "filmsouk-gray": "#A0A0A0",
