@@ -37,11 +37,11 @@ export default function MovieFilterBar({
   "max-h-[60vh] overflow-y-auto"; 
 
   return (
-    <div className="w-1/2  mx-8 flex flex-row justify-center mx-auto align-center px-6 mt-2 mb-8">
-      <div className="flex flex-row  items-center gap-x-3 gap-y-4 mt-8 mb-6">
+    <div className="w-full mx-8 flex flex-row justify-center mx-auto align-center px-4  mt-2 mb-8">
+      <div className="flex flex-col md:flex-row justify-center  items-center gap-x-3 gap-y-4 mt-8 mb-6">
         {/* Genre dropdown */}
         <Select value={genre} onValueChange={(val) => update({ genre: val })}>
-          <SelectTrigger className={`w-10 min-w-0 truncate ${triggerClasses}`}>
+          <SelectTrigger className={`w-20 text-center min-w-0 truncate ${triggerClasses}`}>
             <SelectValue placeholder="Genre" />
           </SelectTrigger>
           <SelectContent className={contentClasses}>
@@ -78,7 +78,7 @@ export default function MovieFilterBar({
           value={language}
           onValueChange={(val) => update({ language: val })}
         >
-          <SelectTrigger className={`w-40 min-w-0 truncate ${triggerClasses}`}>
+          <SelectTrigger className={`w-10 text-center min-w-0 truncate ${triggerClasses}`}>
             <SelectValue placeholder="Language" />
           </SelectTrigger>
           <SelectContent className={contentClasses}>

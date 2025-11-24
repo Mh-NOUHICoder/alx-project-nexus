@@ -281,18 +281,17 @@ export default function Home() {
       {/* Movie Grid */}
       <section className="p-6">
         {/* Heading + Filters row */}
-        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <h1 className="text-3xl font-bold text-white mb-4 md:mb-0">
-            {query ? "Search Results" : "Movies"}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-3 ">
+          <h1 className="text-3xl font-bold text-white text-center md:text-left">
+            {query ? "Search Results" : "Trending Movies"}
           </h1>
-          <div className="absolute top-2 right-2 my-auto">
-            <MovieFilterBar  onFilterChange={(f) => setFilters(f)} />
+          <div className="mt-2 md:mt-0 flex justify-center md:justify-end">
+            <MovieFilterBar onFilterChange={(f) => setFilters(f)} />
           </div>
-          
         </div>
 
         {/* Movies grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-18">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-2">
           {loading ? (
             <p className="text-gray-400 italic col-span-full">Loading…</p>
           ) : movies.length === 0 ? (
