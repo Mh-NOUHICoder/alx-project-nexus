@@ -293,7 +293,11 @@ export default function Home() {
         {/* Movies grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-2">
           {loading ? (
-            <p className="text-gray-400 italic col-span-full">Loading…</p>
+            <div className="flex flex-row gap-2">
+              <div className="w-4 h-4 rounded-full bg-yellow-500 animate-bounce"></div>
+              <div className="w-4 h-4 rounded-full bg-yellow-500 animate-bounce [animation-delay:-.3s]"></div>
+              <div className="w-4 h-4 rounded-full bg-yellow-500 animate-bounce [animation-delay:-.5s]"></div>
+            </div>
           ) : movies.length === 0 ? (
             <p className="text-gray-400 italic col-span-full">
               No movies to show.
