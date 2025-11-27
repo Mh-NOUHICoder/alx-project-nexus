@@ -29,8 +29,9 @@ export default function RootLayout({
       >
         <Header />
         {children}
-        <Footer />
         <ServiceWorkerRegister /> {/* 👈 include here */}
+        <Footer />
+        
       </body>
     </html>
   );
