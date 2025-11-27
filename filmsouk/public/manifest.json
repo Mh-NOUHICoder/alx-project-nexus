@@ -1,0 +1,30 @@
+{
+  "name": "Golden Screen",
+  "short_name": "GoldenScreen",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icons/android/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/android/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/windows11/Square150x150Logo.scale-200.png",
+      "sizes": "150x150",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/windows11/Square44x44Logo.scale-200.png",
+      "sizes": "44x44",
+      "type": "image/png"
+    }
+  ]
+}
