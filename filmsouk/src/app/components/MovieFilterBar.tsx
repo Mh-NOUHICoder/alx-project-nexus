@@ -29,28 +29,35 @@ export default function MovieFilterBar({
     onFilterChange(next);
   }
 
-  // Containers
+  // Outer layout: centered, no horizontal scroll
   const outerContainer = "w-full px-2 mt-2 mb-8 flex justify-center";
-  // Keep everything on a single row on all sizes. Allow horizontal scroll on very small screens.
-  // min-w-0 on the row lets children shrink and truncate correctly.
+  // Row: single line visually, children share available space and shrink when needed
   const rowContainer =
-    "flex flex-row items-center gap-3 whitespace-nowrap overflow-x-auto no-scrollbar max-w-full mx-auto py-3 min-w-0";
+    "flex flex-row items-center gap-3 w-full max-w-3xl mx-auto py-3 min-w-0";
 
-  // Trigger base (glassy, compact, interactive)
-  // Ensure min-w-0 + overflow-hidden so truncate works; pr-8 reserves space for the chevron/indicator
+  // Trigger base: allow shrinking (min-w-0), reserve space for chevron (pr-8),
+  // smaller text on very small screens, larger on sm+
   const triggerBase =
-    "flex items-center justify-between px-4 py-2 rounded-lg border bg-[rgba(20,20,22,0.6)] text-gray-100 text-sm font-medium cursor-pointer " +
-    "backdrop-blur-sm border-gray-700 shadow-sm transition-transform transform hover:-translate-y-0.5 focus:outline-none min-w-0 overflow-hidden";
+    "flex items-center justify-between rounded-lg border bg-[rgba(20,20,22,0.6)] text-gray-100 font-medium " +
+    "backdrop-blur-sm border-gray-700 shadow-sm transition-transform transform hover:-translate-y-0.5 focus:outline-none " +
+    "min-w-0 overflow-hidden";
 
-  // Use flex-none so items stay on one line and don't wrap; use valid Tailwind widths
-  const genreTriggerClass = `flex-none w-36 sm:w-44 md:w-48 lg:w-56 text-left pr-8 truncate ${triggerBase}`;
-  const languageTriggerClass = `flex-none w-24 sm:w-28 md:w-32 lg:w-36 text-left pr-8 truncate ${triggerBase}`;
+  // Use flex-1 so controls share available width and never force horizontal scroll.
+  // On very small screens we reduce padding and font-size to fit.
+  const genreTriggerClass =
+    `flex-1 min-w-0 text-left pr-8 truncate ${triggerBase} ` +
+    "px-3 py-2 text-xs sm:px-4 sm:py-2 sm:text-sm";
+  const languageTriggerClass =
+    `flex-[0.7] min-w-0 text-left pr-8 truncate ${triggerBase} ` +
+    "px-3 py-2 text-xs sm:px-4 sm:py-2 sm:text-sm";
 
   const contentClasses =
     "bg-[#0f0f10] text-gray-200 border border-gray-700 rounded-lg shadow-lg p-2 max-h-[60vh] overflow-y-auto";
 
+  // Clear button stays compact and won't grow
   const clearButtonClass =
-    "flex-none px-4 py-2 rounded-full border border-filmsouk-gold text-filmsouk-gold bg-transparent cursor-pointer hover:bg-filmsouk-gold hover:text-black transition-shadow transition-colors shadow-sm";
+    "flex-none px-3 py-2 rounded-full border border-filmsouk-gold text-filmsouk-gold bg-transparent cursor-pointer " +
+    "hover:bg-filmsouk-gold hover:text-black transition-shadow transition-colors text-xs sm:text-sm";
 
   return (
     <div className={outerContainer}>
