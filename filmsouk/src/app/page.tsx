@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState , useRef } from "react";
 import { fetchFromTMDB } from "@/app/lib/tmdb";
 import MovieCard from "@/app/components/MovieCard";
 import { genreMap } from "@/app/utils/genreMap";
@@ -204,9 +204,21 @@ export default function Home() {
   }, [filters]);
 
   // Search: fetch discover-like search pages (multi-page) and set movies
+
+  // <-- define the ref here
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+
+
+    // Hide keyboard immediately (best-effort)
+    inputRef.current?.blur();
+    if (typeof navigator !== "undefined" && "virtualKeyboard" in navigator) {
+      // @ts-ignore experimental API
+      navigator.virtualKeyboard?.hide?.();
+    }
+
     setLoading(true);
     try {
       // fetch first 3 pages of search
@@ -263,6 +275,7 @@ export default function Home() {
           >
             <Search className="ml-3 text-filmsouk-gold" size={20} />
             <input
+              ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
