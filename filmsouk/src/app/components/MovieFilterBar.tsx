@@ -11,7 +11,6 @@ import {
   SelectItem,
   SelectSeparator,
 } from "@/components/ui/select";
-import { ChevronDown } from "lucide-react";
 
 type Filters = { genre: string; language: string };
 
@@ -30,19 +29,38 @@ export default function MovieFilterBar({
     onFilterChange(next);
   }
 
-  const triggerClasses =
-    "flex items-center justify-between px-4 py-2 w-full rounded-lg border border-gray-700 bg-[#141416] text-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-filmsouk-gold focus:border-filmsouk-gold";
+  // Containers
+  const outerContainer = "w-full px-2 mt-2 mb-8 flex justify-center";
+  // Keep everything on a single row on all sizes. Allow horizontal scroll on very small screens.
+  // min-w-0 on the row lets children shrink and truncate correctly.
+  const rowContainer =
+    "flex flex-row items-center gap-3 whitespace-nowrap overflow-x-auto no-scrollbar max-w-full mx-auto py-3 min-w-0";
+
+  // Trigger base (glassy, compact, interactive)
+  // Ensure min-w-0 + overflow-hidden so truncate works; pr-8 reserves space for the chevron/indicator
+  const triggerBase =
+    "flex items-center justify-between px-4 py-2 rounded-lg border bg-[rgba(20,20,22,0.6)] text-gray-100 text-sm font-medium cursor-pointer " +
+    "backdrop-blur-sm border-gray-700 shadow-sm transition-transform transform hover:-translate-y-0.5 focus:outline-none min-w-0 overflow-hidden";
+
+  // Use flex-none so items stay on one line and don't wrap; use valid Tailwind widths
+  const genreTriggerClass = `flex-none w-36 sm:w-44 md:w-48 lg:w-56 text-left pr-8 truncate ${triggerBase}`;
+  const languageTriggerClass = `flex-none w-24 sm:w-28 md:w-32 lg:w-36 text-left pr-8 truncate ${triggerBase}`;
+
   const contentClasses =
-  "bg-[#141416] text-gray-200 border border-gray-700 rounded-lg shadow-lg p-2 " +
-  "max-h-[60vh] overflow-y-auto"; 
+    "bg-[#0f0f10] text-gray-200 border border-gray-700 rounded-lg shadow-lg p-2 max-h-[60vh] overflow-y-auto";
+
+  const clearButtonClass =
+    "flex-none px-4 py-2 rounded-full border border-filmsouk-gold text-filmsouk-gold bg-transparent cursor-pointer hover:bg-filmsouk-gold hover:text-black transition-shadow transition-colors shadow-sm";
 
   return (
-    <div className="w-full mx-8 flex flex-row justify-center mx-auto align-center px-4  mt-2 mb-8">
-      <div className="flex flex-col md:flex-row justify-center  items-center gap-x-3 gap-y-4 mt-8 mb-6">
+    <div className={outerContainer}>
+      <div className={rowContainer}>
         {/* Genre dropdown */}
         <Select value={genre} onValueChange={(val) => update({ genre: val })}>
-          <SelectTrigger className={`w-20 text-center min-w-0 truncate ${triggerClasses}`}>
-            <SelectValue placeholder="Genre" />
+          <SelectTrigger className={genreTriggerClass}>
+            <span className="truncate block w-full">
+              <SelectValue placeholder="Genre" />
+            </span>
           </SelectTrigger>
           <SelectContent className={contentClasses}>
             <SelectGroup>
@@ -78,8 +96,10 @@ export default function MovieFilterBar({
           value={language}
           onValueChange={(val) => update({ language: val })}
         >
-          <SelectTrigger className={`w-10 text-center min-w-0 truncate ${triggerClasses}`}>
-            <SelectValue placeholder="Language" />
+          <SelectTrigger className={languageTriggerClass}>
+            <span className="truncate block w-full">
+              <SelectValue placeholder="Language" />
+            </span>
           </SelectTrigger>
           <SelectContent className={contentClasses}>
             <SelectGroup>
@@ -114,7 +134,7 @@ export default function MovieFilterBar({
         <button
           type="button"
           onClick={() => update({ genre: "", language: "" })}
-          className="px-3 py-2 rounded-full border border-filmsouk-gold text-filmsouk-gold hover:bg-filmsouk-gold hover:text-black transition shadow-sm whitespace-nowrap"
+          className={clearButtonClass}
         >
           Clear
         </button>
