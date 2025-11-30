@@ -226,6 +226,7 @@ export default function Home() {
       setHeroMovie(null);
     } finally {
       setLoading(false);
+      setQuery("");
     }
   };
 
