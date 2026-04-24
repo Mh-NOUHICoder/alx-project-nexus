@@ -19,6 +19,14 @@ export const genreMap: Record<number, string> = {
   53: "Thriller",
   10752: "War",
   37: "Western",
+  10759: "Action & Adventure",
+  10762: "Kids",
+  10763: "News",
+  10764: "Reality",
+  10765: "Sci-Fi & Fantasy",
+  10766: "Soap",
+  10767: "Talk",
+  10768: "War & Politics",
 };
 
 // Optional Arabic localization
@@ -42,4 +50,16 @@ export const genreMapAr: Record<number, string> = {
   53: "إثارة",
   10752: "حرب",
   37: "غربي",
+  10759: "أكشن ومغامرة",
+  10762: "أطفال",
+  10763: "أخبار",
+  10764: "واقع",
+  10765: "خيال علمي وفانتازيا",
+  10766: "أوبرا صابونية",
+  10767: "حوار",
+  10768: "حرب وسياسة",
+};
+
+export const getGenreName = (id: number, lang: "en" | "ar" = "en") => {
+  return lang === "ar" ? genreMapAr[id] || genreMap[id] : genreMap[id];
 };

@@ -5,6 +5,7 @@ import MovieCard from "@/app/components/MovieCard";
 import { getMovies } from "@/app/lib/tmdb";
 import { Film } from "lucide-react";
 import MovieFilterBar from "@/app/components/MovieFilterBar";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 type Movie = {
   id: number;
@@ -30,40 +31,42 @@ const GENRE_ID: Record<string, number> = {
 };
 
 export default function NewMoviesPage() {
+  const { language, t } = useLanguage();
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [filters, setFilters] = useState({ genre: "", language: "en" });
+  const [filters, setFilters] = useState({ genre: "", language: "" });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadMovies() {
       setLoading(true);
-      const lang = (filters.language || "en").toLowerCase();
+      const langCode = language === "ar" ? "ar-SA" : "en-US";
+      const filterLang = filters.language?.toLowerCase() || "";
       const genreId = filters.genre ? GENRE_ID[filters.genre] : undefined;
 
       // Build discover query safely
       const parts = ["page=1", "include_adult=false", "sort_by=popularity.desc"];
-      if (lang) parts.push(`with_original_language=${lang}`);
+      if (filterLang) parts.push(`with_original_language=${filterLang}`);
       if (genreId) parts.push(`with_genres=${genreId}`);
       const url = `/discover/movie?${parts.join("&")}`;
 
       console.log("Discover URL:", url);
-      const discovered = await getMovies(url);
+      const discovered = await getMovies(url, langCode);
 
       // Fallback if empty
       const final = discovered.length
         ? discovered
-        : await getMovies(`/movie/now_playing?language=${lang}&page=1`);
+        : await getMovies(`/movie/now_playing?page=1`, langCode);
 
       setMovies(final);
       setLoading(false);
     }
     loadMovies();
-  }, [filters]);
+  }, [filters, language]);
 
   return (
     <main className="min-h-screen bg-black text-white p-6 mt-12 flex flex-col items-center">
       <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-3xl font-bold text-gray-400 tracking-wider">New Movies</h1>
+        <h1 className="text-3xl font-bold text-gray-400 tracking-wider">{t("newMovies")}</h1>
       </div>
 
       <MovieFilterBar onFilterChange={setFilters} />
@@ -92,7 +95,7 @@ export default function NewMoviesPage() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-400 italic mt-6">No movies found for these filters.</p>
+        <p className="text-gray-400 italic mt-6">{t("noResults")}</p>
       )}
     </main>
   );

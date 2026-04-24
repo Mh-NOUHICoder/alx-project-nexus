@@ -5,12 +5,14 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { fetchFromTMDB, getWatchProviders } from "@/app/lib/tmdb";
-import { genreMap } from "@/app/utils/genreMap";
+import { getGenreName } from "@/app/utils/genreMap";
 import { Clapperboard, X } from "lucide-react";
 import MovieCard from "@/app/components/MovieCard";
 import WatchProviders from "@/app/components/sections/WatchProviders";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 export default function MovieDetails() {
+  const { language, t } = useLanguage();
   const { id } = useParams();
   const [movie, setMovie] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -30,10 +32,19 @@ export default function MovieDetails() {
 
   useEffect(() => {
     async function loadMovie() {
-      const data = await fetchFromTMDB(
-        `/movie/${id}?append_to_response=credits,videos`
+      const langCode = language === "ar" ? "ar-SA" : "en-US";
+      let data = await fetchFromTMDB(
+        `/movie/${id}?append_to_response=credits,videos`,
+        langCode
       );
       if (data) {
+        // Fallback for main movie videos if empty in localized language
+        if (language === "ar" && (!data.videos?.results || data.videos.results.length === 0)) {
+          const enData = await fetchFromTMDB(`/movie/${id}/videos`, "en-US");
+          if (enData?.results) {
+            data.videos = { results: enData.results };
+          }
+        }
         setMovie(data);
 
         // Check favorites
@@ -45,9 +56,9 @@ export default function MovieDetails() {
       }
 
       // Fetch recommendations
-      let recData = await fetchFromTMDB(`/movie/${id}/recommendations`);
+      let recData = await fetchFromTMDB(`/movie/${id}/recommendations`, langCode);
       if (!recData?.results?.length) {
-        recData = await fetchFromTMDB(`/movie/${id}/similar`);
+        recData = await fetchFromTMDB(`/movie/${id}/similar`, langCode);
       }
       setRecommendations(recData.results || []);
 
@@ -57,7 +68,7 @@ export default function MovieDetails() {
     }
 
     if (id) loadMovie();
-  }, [id]);
+  }, [id, language]);
 
   const handleFavoriteClick = () => {
     setIsFavorite(!isFavorite);
@@ -71,7 +82,7 @@ export default function MovieDetails() {
         posterPath: movie.poster_path,
         rating: movie.vote_average,
         releaseDate: movie.release_date,
-        genres: movie.genres.map((g: any) => genreMap[g.id]),
+        genres: movie.genres.map((g: any) => getGenreName(g.id, language === "ar" ? "ar" : "en")),
       });
       localStorage.setItem("favorites", JSON.stringify(favorites));
     } else {
@@ -90,6 +101,8 @@ export default function MovieDetails() {
 
   const trailer = movie.videos?.results?.find(
     (v: any) => v.type === "Trailer" && v.site === "YouTube"
+  ) || movie.videos?.results?.find(
+    (v: any) => (v.type === "Teaser" || v.type === "Clip") && v.site === "YouTube"
   );
 
   return (
@@ -135,7 +148,7 @@ export default function MovieDetails() {
               onClick={() => setShowTrailer(true)}
               className="flex items-center gap-2 mt-4 px-6 py-3 bg-filmsouk-gold text-black font-semibold rounded-lg shadow-md hover:scale-105 cursor-pointer transition"
             >
-              <Clapperboard size={24} className="" /> Watch Trailer
+              <Clapperboard size={24} className="" /> {t("watchTrailer")}
             </button>
           )}
         </div>
@@ -143,22 +156,22 @@ export default function MovieDetails() {
 
       {/* Details Section */}
       <section className="p-6 max-w-4xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-4">Overview</h2>
+        <h2 className="text-2xl font-semibold mb-4">{t("overview")}</h2>
         <p className="text-gray-300 leading-relaxed">{movie.overview}</p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">Genres</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-4">{t("genres")}</h2>
         <div className="flex flex-wrap gap-2">
           {movie.genres.map((g: any) => (
             <span
               key={g.id}
               className="px-3 py-1 bg-white/20 text-white rounded-full text-sm"
             >
-              {genreMap[g.id] || g.name}
+              {getGenreName(g.id, language === "ar" ? "ar" : "en")}
             </span>
           ))}
         </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">Cast</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-4">{t("cast")}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {movie.credits.cast.slice(0, 8).map((actor: any) => (
             <div key={actor.id} className="text-center">
@@ -181,7 +194,7 @@ export default function MovieDetails() {
       {/* Recommendations Section */}
       <section className="p-6 max-w-6xl mx-auto">
         <h2 className="text-2xl font-semibold mb-4">
-          Recommendations
+          {t("recommendations")}
         </h2>
         {recommendations.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -198,39 +211,28 @@ export default function MovieDetails() {
                 posterPath={rec.poster_path}
                 rating={rec.vote_average}
                 releaseDate={rec.release_date}
-                genres={rec.genre_ids?.map((id: number) => genreMap[id])}
+                genres={rec.genre_ids?.map((id: number) => getGenreName(id, language === "ar" ? "ar" : "en"))}
               />
             ))}
           </div>
         ) : (
-          <p className="text-gray-400">No recommendations available.</p>
+          <p className="text-gray-400">{t("noResults")}</p>
         )}
       </section>
 
       {/* Trailer Modal */}
       {showTrailer && trailer && (
-        <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-          onClick={() => setShowTrailer(false)}
-        >
-          <div
-            className="relative w-full max-w-3xl aspect-video bg-black rounded-lg shadow-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[60]" onClick={() => setShowTrailer(false)}>
+          <div className="relative w-full max-w-4xl aspect-video bg-black rounded-xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <iframe
-              src={`https://www.youtube.com/embed/${trailer.key}`}
+              src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1`}
               title="Movie Trailer"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="autoplay; encrypted-media"
               allowFullScreen
-              className="w-full h-full rounded-lg"
+              className="w-full h-full rounded-xl"
             ></iframe>
-
-            <button
-              onClick={() => setShowTrailer(false)}
-              className="absolute top-[-50px] right-2 bg-black/30 text-white p-2 rounded-full hover:text-filmsouk-gold hover:scale-105 cursor-pointer transition"
-              aria-label="Close"
-            >
-              <X size={24} />
+            <button onClick={() => setShowTrailer(false)} className="absolute top-[-50px] right-2 text-white hover:text-filmsouk-gold transition">
+              <X size={32} />
             </button>
           </div>
         </div>

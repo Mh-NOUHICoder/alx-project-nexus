@@ -1,14 +1,14 @@
 // app/lib/tmdb.ts
-import { genreMap } from "@/app/utils/genreMap";
+import { getGenreName } from "@/app/utils/genreMap";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_KEY;
 
 // Fetch raw JSON from TMDB (returns the full payload)
-export async function fetchFromTMDB(endpoint: string) {
+export async function fetchFromTMDB(endpoint: string, lang: string = "en-US") {
   try {
     const separator = endpoint.includes("?") ? "&" : "?";
-    const url = `${API_BASE_URL}${endpoint}${separator}api_key=${API_KEY}`;
+    const url = `${API_BASE_URL}${endpoint}${separator}api_key=${API_KEY}&language=${lang}`;
     const res = await fetch(url, { headers: { "Content-Type": "application/json" } });
 
     if (!res.ok) {
@@ -28,8 +28,8 @@ export async function fetchFromTMDB(endpoint: string) {
  * getMovies: returns a normalized array ready for your UI.
  * Use this when you want mapped movies (not raw payloads).
  */
-export async function getMovies(endpoint: string) {
-  const data = await fetchFromTMDB(endpoint);
+export async function getMovies(endpoint: string, lang: string = "en-US") {
+  const data = await fetchFromTMDB(endpoint, lang);
   if (!data || !Array.isArray(data.results)) return [];
 
   return data.results.map((m: any) => ({
@@ -40,7 +40,7 @@ export async function getMovies(endpoint: string) {
     backdropPath: m.backdrop_path,
     rating: m.vote_average,
     releaseDate: m.release_date,
-    genres: (m.genre_ids || []).map((id: number) => genreMap[id]).filter(Boolean),
+    genres: (m.genre_ids || []).map((id: number) => getGenreName(id, lang.startsWith("ar") ? "ar" : "en")).filter(Boolean),
     original_language: m.original_language,
   }));
 }
@@ -48,11 +48,28 @@ export async function getMovies(endpoint: string) {
 /**
  * Optional: get raw results array when you need full control (e.g., merging pages)
  */
-export async function getResults(endpoint: string) {
-  const data = await fetchFromTMDB(endpoint);
+export async function getResults(endpoint: string, lang: string = "en-US") {
+  const data = await fetchFromTMDB(endpoint, lang);
   return data?.results ?? [];
 }
 
-export async function getWatchProviders(movieId: string) {
-  return fetchFromTMDB(`/movie/${movieId}/watch/providers`);
+export async function getTVShows(endpoint: string, lang: string = "en-US") {
+  const data = await fetchFromTMDB(endpoint, lang);
+  if (!data || !Array.isArray(data.results)) return [];
+
+  return data.results.map((m: any) => ({
+    id: m.id,
+    title: m.name, // TV shows use 'name' instead of 'title'
+    original_title: m.original_name,
+    posterPath: m.poster_path,
+    backdropPath: m.backdrop_path,
+    rating: m.vote_average,
+    releaseDate: m.first_air_date, // TV shows use 'first_air_date'
+    genres: (m.genre_ids || []).map((id: number) => getGenreName(id, lang.startsWith("ar") ? "ar" : "en")).filter(Boolean),
+    original_language: m.original_language,
+  }));
+}
+
+export async function getWatchProviders(id: string, type: "movie" | "tv" = "movie") {
+  return fetchFromTMDB(`/${type}/${id}/watch/providers`);
 }

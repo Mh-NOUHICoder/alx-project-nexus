@@ -3,10 +3,11 @@
 import { useEffect, useState , useRef } from "react";
 import { fetchFromTMDB } from "@/app/lib/tmdb";
 import MovieCard from "@/app/components/MovieCard";
-import { genreMap } from "@/app/utils/genreMap";
+import { getGenreName } from "@/app/utils/genreMap";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import MovieFilterBar from "@/app/components/MovieFilterBar";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 type Movie = {
   id: number;
@@ -18,6 +19,7 @@ type Movie = {
   genres: string[];
   original_language?: string;
   overview?: string;
+  type: "movie" | "series";
 };
 
 const GENRE_ID: Record<string, number> = {
@@ -42,38 +44,45 @@ const GENRE_ID: Record<string, number> = {
 };
 
 export default function Home() {
+  const { language, t } = useLanguage();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [heroMovie, setHeroMovie] = useState<Movie | null>(null);
   const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState({ genre: "", language: "" });
+  const [filters, setFilters] = useState({ genre: "", language: "", sortBy: "popularity.desc" });
   const [loading, setLoading] = useState(false);
 
   function mapResults(results: any[] = []): Movie[] {
-    return (results || []).map((m: any) => ({
-      id: m.id,
-      title: m.title ?? m.name ?? "Untitled",
-      posterPath: m.poster_path ?? null,
-      backdropPath: m.backdrop_path ?? null,
-      rating: typeof m.vote_average === "number" ? m.vote_average : undefined,
-      releaseDate: m.release_date ?? m.first_air_date,
-      genres: (m.genre_ids || [])
-        .map((id: number) => genreMap[id])
-        .filter(Boolean),
-      original_language: m.original_language,
-      overview: m.overview,
-    }));
+    return (results || [])
+      .filter((m: any) => m.media_type !== "person")
+      .map((m: any) => ({
+        id: m.id,
+        title: m.title ?? m.name ?? "Untitled",
+        posterPath: m.poster_path ?? null,
+        backdropPath: m.backdrop_path ?? null,
+        rating: typeof m.vote_average === "number" ? m.vote_average : undefined,
+        releaseDate: m.release_date ?? m.first_air_date,
+        genres: (m.genre_ids || [])
+          .map((id: number) => getGenreName(id, language === "ar" ? "ar" : "en"))
+          .filter(Boolean),
+        original_language: m.original_language,
+        overview: m.overview,
+        type: m.media_type === "tv" ? "series" : "movie",
+      }));
   }
 
   // Build safe discover URL for a page
   function buildDiscoverUrl(
     page: number,
-    opts?: { genre?: string; lang?: string }
+    opts?: { genre?: string; lang?: string; sortBy?: string }
   ) {
     const parts: string[] = [
       `page=${page}`,
       "include_adult=false",
-      "sort_by=popularity.desc",
+      `sort_by=${opts?.sortBy || "popularity.desc"}`,
     ];
+    if (opts?.sortBy === "vote_average.desc") {
+      parts.push("vote_count.gte=100");
+    }
     if (opts?.lang) parts.push(`with_original_language=${opts.lang}`);
     if (opts?.genre) parts.push(`with_genres=${opts.genre}`);
     return `/discover/movie?${parts.join("&")}`;
@@ -95,6 +104,7 @@ export default function Home() {
     useDiscover?: boolean;
     genreId?: number | null;
     lang?: string;
+    sortBy?: string;
     pages?: number;
   }) {
     setLoading(true);
@@ -102,6 +112,7 @@ export default function Home() {
       const pages = opts?.pages ?? 3;
       const lang = opts?.lang ?? "";
       const genreId = opts?.genreId ?? null;
+      const langCode = language === "ar" ? "ar-SA" : "en-US";
 
       if (opts?.useDiscover) {
         // Build urls for multiple pages
@@ -109,12 +120,13 @@ export default function Home() {
           buildDiscoverUrl(i + 1, {
             genre: genreId ? String(genreId) : undefined,
             lang: lang || undefined,
+            sortBy: opts?.sortBy,
           })
         );
         console.log("Discover URLs:", urls);
 
         // Fetch in parallel
-        const responses = await Promise.all(urls.map((u) => fetchFromTMDB(u)));
+        const responses = await Promise.all(urls.map((u) => fetchFromTMDB(u, langCode)));
         const resultsPerPage = responses.map((r) => r?.results ?? []);
         let combined = dedupeById(resultsPerPage);
 
@@ -125,7 +137,7 @@ export default function Home() {
               buildDiscoverUrl(i + 1, { genre: String(genreId) })
             );
             const r2 = await Promise.all(
-              genreUrls.map((u) => fetchFromTMDB(u))
+              genreUrls.map((u) => fetchFromTMDB(u, langCode))
             );
             combined = dedupeById(r2.map((r) => r?.results ?? []));
           }
@@ -135,14 +147,14 @@ export default function Home() {
             const langUrls = Array.from({ length: pages }, (_, i) =>
               buildDiscoverUrl(i + 1, { lang })
             );
-            const r3 = await Promise.all(langUrls.map((u) => fetchFromTMDB(u)));
+            const r3 = await Promise.all(langUrls.map((u) => fetchFromTMDB(u, langCode)));
             combined = dedupeById(r3.map((r) => r?.results ?? []));
           }
         }
 
         // Final fallback: trending
         if (combined.length === 0) {
-          const trending = await fetchFromTMDB("/trending/movie/week?page=1");
+          const trending = await fetchFromTMDB("/trending/movie/week?page=1", langCode);
           combined = trending?.results ?? [];
         }
 
@@ -159,7 +171,7 @@ export default function Home() {
         (_, i) => `/trending/movie/week?page=${i + 1}`
       );
       const trendingResponses = await Promise.all(
-        trendingUrls.map((u) => fetchFromTMDB(u))
+        trendingUrls.map((u) => fetchFromTMDB(u, langCode))
       );
       const trendingResults = trendingResponses.map((r) => r?.results ?? []);
       const combinedTrending = dedupeById(trendingResults);
@@ -177,31 +189,29 @@ export default function Home() {
 
   // Initial load: fetch a bigger pool (trending pages)
   useEffect(() => {
+    const langCode = language === "ar" ? "ar-SA" : "en-US";
     loadPool({ useDiscover: false, pages: 2 }); // trending pages 1..2 initially
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [language]);
 
   // Effect when filters change: use discover with genre/lang
   useEffect(() => {
-    const lang = filters.language?.trim() || "";
-    const genreKey = filters.genre?.trim() || "";
-    const genreId = genreKey ? GENRE_ID[genreKey] : undefined;
+    if (query) return;
 
-    // If no filters, load trending pool again
-    if (!genreKey && !lang) {
-      loadPool({ useDiscover: false, pages: 2 });
+    if (!filters.genre && !filters.language && filters.sortBy === "popularity.desc") {
+      loadPool({ useDiscover: false, pages: 3 });
       return;
     }
 
-    // Use discover to fetch 3 pages by default
     loadPool({
       useDiscover: true,
-      genreId: genreId ?? null,
-      lang: lang || undefined,
+      genreId: filters.genre ? GENRE_ID[filters.genre] : null,
+      lang: filters.language || "",
+      sortBy: filters.sortBy,
       pages: 3,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filters, language]);
 
   // Search: fetch discover-like search pages (multi-page) and set movies
 
@@ -225,9 +235,10 @@ export default function Home() {
       const urls = Array.from(
         { length: 3 },
         (_, i) =>
-          `/search/movie?query=${encodeURIComponent(query)}&page=${i + 1}`
+          `/search/multi?query=${encodeURIComponent(query)}&page=${i + 1}`
       );
-      const responses = await Promise.all(urls.map((u) => fetchFromTMDB(u)));
+      const langCode = language === "ar" ? "ar-SA" : "en-US";
+      const responses = await Promise.all(urls.map((u) => fetchFromTMDB(u, langCode)));
       const combined = dedupeById(responses.map((r) => r?.results ?? []));
       const mapped = mapResults(combined);
       setMovies(mapped);
@@ -262,10 +273,10 @@ export default function Home() {
 
         <div className="relative z-10  text-shadow-sm text-center px-6 max-w-2xl animate-fadeIn">
           <h1 className="text-3xl md:text-6xl font-bold text-filmsouk-gold drop-shadow-lg">
-            Welcome to Golden <span className="text-gray-200/70">Screen</span>
+            {t("welcomeTitle")}
           </h1>
           <p className="mt-4 text-lg md:text-xl text-gray-200">
-            Discover trending films, timeless classics, and hidden gems.
+            {t("welcomeSubtitle")}
           </p>
 
           {/* Search Bar */}
@@ -279,14 +290,14 @@ export default function Home() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search movies..."
+              placeholder={t("searchPlaceholder")}
               className="flex-1 px-4 py-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
             />
             <button
               type="submit"
               className="px-5 py-3 bg-filmsouk-gold text-black font-semibold hover:bg-yellow-400 transition"
             >
-              Search
+              {t("search")}
             </button>
           </form>
         </div>
@@ -297,7 +308,7 @@ export default function Home() {
         {/* Heading + Filters row */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-3 ">
           <h1 className="text-3xl font-bold text-white text-center md:text-left">
-            {query ? "Search Results" : "Trending Movies"}
+            {query ? t("searchResults") : t("trendingMovies")}
           </h1>
           <div className="mt-2 md:mt-0 flex justify-center md:justify-end">
             <MovieFilterBar onFilterChange={(f) => setFilters(f)} />
@@ -314,7 +325,7 @@ export default function Home() {
             </div>
           ) : movies.length === 0 ? (
             <p className="text-gray-400 italic col-span-full">
-              No movies to show.
+              {t("noResults")}
             </p>
           ) : (
             movies.map((m) => (
@@ -326,6 +337,7 @@ export default function Home() {
                 rating={m.rating}
                 releaseDate={m.releaseDate}
                 genres={m.genres}
+                type={m.type}
               />
             ))
           )}

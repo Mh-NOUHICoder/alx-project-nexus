@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Home, Heart, Sparkles, Menu, X, Search } from "lucide-react";
+import { Home, Heart, Sparkles, Menu, X, Search, Tv } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { fetchFromTMDB } from "@/app/lib/tmdb";
-import { genreMap } from "@/app/utils/genreMap";
+import { getGenreName } from "@/app/utils/genreMap";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 export default function Header() {
+  const { language, setLanguage, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
@@ -30,16 +32,21 @@ export default function Header() {
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
       if (query.trim().length > 2) {
-        const data = await fetchFromTMDB(`/search/movie?query=${encodeURIComponent(query)}`);
+        const langCode = language === "ar" ? "ar-SA" : "en-US";
+        const data = await fetchFromTMDB(`/search/multi?query=${encodeURIComponent(query)}`, langCode);
         if (data?.results) {
           setResults(
-            data.results.slice(0, 5).map((m: any) => ({
-              id: m.id,
-              title: m.title,
-              posterPath: m.poster_path,
-              releaseDate: m.release_date,
-              genres: m.genre_ids.map((id: number) => genreMap[id]),
-            }))
+            data.results
+              .filter((m: any) => m.media_type === "movie" || m.media_type === "tv")
+              .slice(0, 5)
+              .map((m: any) => ({
+                id: m.id,
+                title: m.title || m.name,
+                posterPath: m.poster_path,
+                releaseDate: m.release_date || m.first_air_date,
+                genres: (m.genre_ids || []).map((id: number) => getGenreName(id, language === "ar" ? "ar" : "en")).filter(Boolean),
+                mediaType: m.media_type,
+              }))
           );
         }
       } else {
@@ -56,10 +63,7 @@ export default function Header() {
   };
 
   return (
-    <header
-      className="fixed top-0 left-0 w-full h-12 z-50 flex items-center justify-between px-6 py-4
-                 bg-black/60  border-b border-white/10 transition-all duration-300"
-    >
+    <header className="fixed top-0 left-0 w-full h-16 z-50 flex items-center justify-between px-6 bg-black/60 border-b border-white/10 transition-all duration-300">
       {/* Logo */}
       <Link href="/" className="flex items-center space-x-3 z-20">
         <Image src="/icons/play-icon.png" alt="Golden Screen Logo" width={50} height={40} />
@@ -71,15 +75,34 @@ export default function Header() {
       {/* Desktop Navigation */}
       <nav className="hidden md:flex flex-1 justify-center space-x-8 text-lg text-gray-300">
         <Link href="/" className="flex items-center gap-2 hover:text-[#D4AF37] transition-colors">
-          <Home size={20} /> Home
+          <Home size={20} /> {t("home")}
         </Link>
         <Link href="/favorites" className="flex items-center gap-2 hover:text-[#D4AF37] transition-colors">
-          <Heart size={20} /> Favorites
+          <Heart size={20} /> {t("favorites")}
         </Link>
         <Link href="/new-movies" className="flex items-center gap-2 hover:text-[#D4AF37] transition-colors">
-          <Sparkles size={20} /> New Movies
+          <Sparkles size={20} /> {t("newMovies")}
+        </Link>
+        <Link href="/series" className="flex items-center gap-2 hover:text-[#D4AF37] transition-colors">
+          <Tv size={20} /> {t("tvShows")}
         </Link>
       </nav>
+
+      {/* Language Switcher */}
+      <div className="hidden md:flex items-center gap-2 mr-4">
+        <button
+          onClick={() => setLanguage("en")}
+          className={`px-2 py-1 rounded text-xs font-bold transition ${language === "en" ? "bg-filmsouk-gold text-black" : "text-gray-400 hover:text-white"}`}
+        >
+          EN
+        </button>
+        <button
+          onClick={() => setLanguage("ar")}
+          className={`px-2 py-1 rounded text-xs font-bold transition ${language === "ar" ? "bg-filmsouk-gold text-black" : "text-gray-400 hover:text-white"}`}
+        >
+          AR
+        </button>
+      </div>
       
 
       {/* Small Search Input (only on non-home pages) */}
@@ -96,27 +119,32 @@ export default function Header() {
           <Search className="ml-2 text-[#D4AF37]" size={18} />
           {results.length > 0 && (
             <div className="absolute top-full right-0 mt-2 w-72 bg-neutral-950/95 backdrop-blur-md rounded-lg border border-white/10 shadow-xl p-3 z-50">
-              {results.map((movie) => (
+              {results.map((item) => (
                 <Link
-                  key={movie.id}
-                  href={`/movies/${movie.id}`}
+                  key={item.id}
+                  href={item.mediaType === "movie" ? `/movies/${item.id}` : `/series/${item.id}`}
                   onClick={handleResultClick}
                   className="flex items-center gap-3 p-2 hover:bg-white/10 rounded-md transition"
                 >
-                  {movie.posterPath && (
+                  {item.posterPath && (
                     <Image
-                      src={`https://image.tmdb.org/t/p/w92${movie.posterPath}`}
-                      alt={movie.title}
+                      src={`https://image.tmdb.org/t/p/w92${item.posterPath}`}
+                      alt={item.title}
                       width={40}
                       height={60}
                       className="rounded"
                     />
                   )}
                   <div className="flex flex-col">
-                    <span className="text-white text-sm font-semibold">{movie.title}</span>
-                    <span className="text-xs text-gray-400">
-                      {movie.releaseDate?.slice(0, 4)} • {movie.genres.join(", ")}
-                    </span>
+                    <span className="text-white text-sm font-semibold line-clamp-1">{item.title}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold ${item.mediaType === 'movie' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                        {item.mediaType === 'movie' ? t('movie') : t('tv')}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {item.releaseDate?.slice(0, 4)}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -182,33 +210,38 @@ export default function Header() {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search movies..."
+                  placeholder={t("searchPlaceholder")}
                   className="w-full px-4 py-3 bg-white/10 text-white placeholder-gray-400 rounded-md
                              focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/60"
                 />
                 {results.length > 0 && (
                   <div className="absolute top-full left-0 mt-2 w-full bg-neutral-950/95 rounded-lg border border-white/10 shadow-xl p-2">
-                    {results.map((movie) => (
+                    {results.map((item) => (
                       <Link
-                        key={movie.id}
-                        href={`/movies/${movie.id}`}
+                        key={item.id}
+                        href={item.mediaType === "movie" ? `/movies/${item.id}` : `/series/${item.id}`}
                         onClick={handleResultClick}
                         className="flex items-center gap-3 p-2 hover:bg-white/10 rounded-md transition"
                       >
-                        {movie.posterPath && (
+                        {item.posterPath && (
                           <Image
-                            src={`https://image.tmdb.org/t/p/w92${movie.posterPath}`}
-                            alt={movie.title}
+                            src={`https://image.tmdb.org/t/p/w92${item.posterPath}`}
+                            alt={item.title}
                             width={32}
                             height={48}
                             className="rounded"
                           />
                         )}
                         <div className="flex flex-col">
-                          <span className="text-white text-sm font-medium">{movie.title}</span>
-                          <span className="text-xs text-gray-400">
-                            {movie.releaseDate?.slice(0, 4)} • {movie.genres.join(", ")}
-                          </span>
+                          <span className="text-white text-sm font-medium line-clamp-1">{item.title}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold ${item.mediaType === 'movie' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                              {item.mediaType === 'movie' ? 'Movie' : 'TV'}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {item.releaseDate?.slice(0, 4)}
+                            </span>
+                          </div>
                         </div>
                       </Link>
                     ))}
@@ -243,7 +276,30 @@ export default function Header() {
                 <Sparkles size={22} className="text-[#D4AF37]" />
                 <span className="text-base font-medium">New Movies</span>
               </Link>
+              <Link
+                href="/series"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-2 py-3 rounded-md text-white hover:bg-white/10 transition"
+              >
+                <Tv size={22} className="text-[#D4AF37]" />
+                <span className="text-base font-medium">{t("tvShows")}</span>
+              </Link>
             </nav>
+
+            <div className="flex items-center gap-4 mt-4">
+              <button
+                onClick={() => { setLanguage("en"); setOpen(false); }}
+                className={`flex-1 py-2 rounded-md font-bold transition ${language === "en" ? "bg-filmsouk-gold text-black" : "bg-white/5 text-gray-400"}`}
+              >
+                English
+              </button>
+              <button
+                onClick={() => { setLanguage("ar"); setOpen(false); }}
+                className={`flex-1 py-2 rounded-md font-bold transition ${language === "ar" ? "bg-filmsouk-gold text-black" : "bg-white/5 text-gray-400"}`}
+              >
+                العربية
+              </button>
+            </div>
 
             {/* Safe area padding at bottom */}
             <div className="mt-auto pt-4">

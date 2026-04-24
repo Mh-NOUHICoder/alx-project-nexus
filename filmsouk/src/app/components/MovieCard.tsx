@@ -13,6 +13,7 @@ interface MovieCardProps {
   rating?: number;
   releaseDate?: string;
   genres?: string[];
+  type?: "movie" | "series";
 }
 
 export default function MovieCard({
@@ -23,6 +24,7 @@ export default function MovieCard({
   rating,
   releaseDate,
   genres = [],
+  type = "movie",
 }: MovieCardProps) {
   const IMG_BASE_URL = "https://image.tmdb.org/t/p/w500";
   const primaryGenres = genres.slice(0, 2);
@@ -45,7 +47,7 @@ export default function MovieCard({
     const alreadyExists = favorites.some((f: any) => f.id === id);
 
     if (!alreadyExists) {
-      favorites.push({ id, title, posterPath, rating, releaseDate, genres });
+      favorites.push({ id, title, posterPath, rating, releaseDate, genres, type });
       localStorage.setItem("favorites", JSON.stringify(favorites));
       setIsFavorite(true);
     } else {
@@ -55,8 +57,10 @@ export default function MovieCard({
     }
   };
 
+  const href = type === "movie" ? `/movies/${id}` : `/series/${id}`;
+
   return (
-    <Link href={`/movies/${id}`} className="block">
+    <Link href={href} className="block">
       <div className="relative group w-full max-w-xs rounded-xl overflow-hidden shadow-xl border border-filmsouk-gold bg-black hover:cursor-pointer">
         {/* Poster */}
         <Image
