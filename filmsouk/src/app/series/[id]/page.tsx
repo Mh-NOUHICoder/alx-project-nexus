@@ -140,25 +140,17 @@ export default function SeriesDetails() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/80"></div>
 
-        <div className="absolute bottom-10 left-10 z-10">
-          <h1 className="text-xl md:text-3xl font-bold text-filmsouk-gold">
+        <div className="absolute bottom-24 left-10 z-10 max-w-2xl">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow-lg mb-2">
             {series.name}
           </h1>
-          <div className="mt-4 flex items-center gap-4 text-sm md:text-base">
-            <span>{series.first_air_date?.slice(0, 4)}</span>
-            <span className="text-filmsouk-gold font-bold">{series.vote_average.toFixed(1)} ⭐</span>
+          <div className="flex items-center gap-4 text-sm md:text-base font-medium text-gray-300">
+            <span className="text-filmsouk-gold">{series.first_air_date?.slice(0, 4)}</span>
+            <span>•</span>
             <span>{series.number_of_seasons} {t("seasons")}</span>
-            <span className="bg-white/10 px-2 py-1 rounded">{t("tvShows")}</span>
+            <span>•</span>
+            <span className="bg-white/10 px-2 py-0.5 rounded text-xs uppercase tracking-wider">{t("tvShows")}</span>
           </div>
-
-          {trailer && (
-            <button
-              onClick={() => setShowTrailer(true)}
-              className="flex items-center gap-2 mt-4 px-6 py-3 bg-filmsouk-gold text-black font-semibold rounded-lg hover:scale-105 transition"
-            >
-              <Clapperboard size={24} /> {t("watchTrailer")}
-            </button>
-          )}
         </div>
       </section>
 
@@ -182,11 +174,20 @@ export default function SeriesDetails() {
                </div>
                <button
                   onClick={handleFavoriteClick}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-filmsouk-gold hover:text-black rounded-xl transition font-bold"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-red-500/20 hover:text-red-500 rounded-xl transition font-bold border border-white/5"
                >
                   {isFavorite ? <FaHeart size={20} className="text-red-500" /> : <FaRegHeart size={20} />}
                   {isFavorite ? t("favorites") : t("favorites")}
                </button>
+
+               {trailer && (
+                <button
+                  onClick={() => setShowTrailer(true)}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-filmsouk-gold text-black font-bold rounded-xl hover:scale-[1.02] transition shadow-lg shadow-filmsouk-gold/20"
+                >
+                  <Clapperboard size={20} /> {t("watchTrailer")}
+                </button>
+               )}
             </div>
           </div>
 
